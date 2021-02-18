@@ -14,9 +14,19 @@ public:
 	void Run();
 
 private:
+	bool CreateContext(const Config& config);
+	bool CreateResources();
+	bool CreateShaders();
+
 	void Update();
 	void Render();
 	void Present();
 
 private:
+	IDXGISwapChain* _swapChain = nullptr;
+	ID3D11Device* _device = nullptr;
+	ID3D11DeviceContext* _deviceContext = nullptr;
+
+	ID3D11Buffer* _vertexBuffer = nullptr;
+	ID3D11Buffer* _indexBuffer = nullptr;
 };

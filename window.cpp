@@ -72,7 +72,7 @@ bool Window::Create() {
 	renderConfig._width = _width;
 	renderConfig._height = _height;
 	renderConfig._window = _window;
-	if (!_Renderer.Create(renderConfig)) {
+	if (!_renderer.Create(renderConfig)) {
 		return false;
 	}
 
@@ -92,7 +92,7 @@ void Window::Run() {
 			TranslateMessage(&message);
 			DispatchMessage(&message);
 		} else {
-			_Renderer.Run();
+			_renderer.Run();
 		}
 	}
 }

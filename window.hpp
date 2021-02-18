@@ -22,5 +22,5 @@ private:
 	const int _height = 400;
 	HWND _window = nullptr;
 
-	Renderer _Renderer;
+	Renderer _renderer;
 };
