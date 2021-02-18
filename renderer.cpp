@@ -1,5 +1,7 @@
 #include "renderer.hpp"
 
+#include <d3dcompiler.h>
+
 
 namespace {
 	struct Float3 {
@@ -117,16 +119,54 @@ bool Renderer::CreateResources() {
 }
 
 bool Renderer::CreateShaders() {
+	if (!CompileShader(L"vertex_shader.hlsl", "main", "vs_5_0", &_vertexShader))
+		return false;
+
+	if (!CompileShader(L"pixel_shader.hlsl", "main", "ps_5_0", &_pixelShader))
+		return false;
+
+	return true;
+}
+
+bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob) {
+	const D3D_SHADER_MACRO defines[1] = {};
+	ID3DBlob* shaderBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+	HRESULT result = D3DCompileFromFile(
+		srcFile,
+		defines,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		entryPoint,
+		profile,
+		D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG,
+		0,
+		&shaderBlob,
+		&errorBlob);
+
+	if(FAILED(result)) {
+		if(errorBlob) {
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			errorBlob->Release();
+		}
+
+		if(shaderBlob)
+			shaderBlob->Release();
+
+		return false;
+	}
+
+	*blob = shaderBlob;
+
 	return true;
 }
 
 void Renderer::Update() {
-	ID3D11Buffer* vertexBuffers = {_vertexBuffer};
+	ID3D11Buffer* vertexBuffers = {_vertexBuffer.Get()};
 	UINT strides[] = {0};
 	UINT offsets[] = {0};
 	_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffers, strides, offsets);
 
-	_deviceContext->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 }
 
 void Renderer::Render() {

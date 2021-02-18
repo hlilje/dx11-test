@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wrl.h>
 #include <d3d11.h>
 
 
@@ -18,15 +19,23 @@ private:
 	bool CreateResources();
 	bool CreateShaders();
 
+	bool CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob);
+
 	void Update();
 	void Render();
 	void Present();
 
 private:
-	IDXGISwapChain* _swapChain = nullptr;
-	ID3D11Device* _device = nullptr;
-	ID3D11DeviceContext* _deviceContext = nullptr;
+	template<typename T>
+	using ComPtrT = Microsoft::WRL::ComPtr<T>;
 
-	ID3D11Buffer* _vertexBuffer = nullptr;
-	ID3D11Buffer* _indexBuffer = nullptr;
+	ComPtrT<ID3D11Device> _device = nullptr;
+	ComPtrT<ID3D11DeviceContext> _deviceContext = nullptr;
+	ComPtrT<IDXGISwapChain> _swapChain = nullptr;
+
+	ComPtrT<ID3D11Buffer> _vertexBuffer = nullptr;
+	ComPtrT<ID3D11Buffer> _indexBuffer = nullptr;
+
+	ComPtrT<ID3DBlob> _vertexShader = nullptr;
+	ComPtrT<ID3DBlob> _pixelShader = nullptr;
 };
