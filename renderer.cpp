@@ -119,10 +119,24 @@ bool Renderer::CreateResources() {
 }
 
 bool Renderer::CreateShaders() {
-	if (!CompileShader(L"vertex_shader.hlsl", "main", "vs_5_0", &_vertexShader))
+	if (!CompileShader(L"vertex_shader.hlsl", "main", "vs_5_0", &_vertexShaderBlob))
 		return false;
 
-	if (!CompileShader(L"pixel_shader.hlsl", "main", "ps_5_0", &_pixelShader))
+	if (FAILED(_device->CreateVertexShader(
+		_vertexShaderBlob->GetBufferPointer(),
+		_vertexShaderBlob->GetBufferSize(),
+		nullptr,
+		&_vertexShader) ) )
+		return false;
+
+	if (!CompileShader(L"pixel_shader.hlsl", "main", "ps_5_0", &_pixelShaderBlob))
+		return false;
+
+	if (FAILED(_device->CreatePixelShader(
+		_pixelShaderBlob->GetBufferPointer(),
+		_pixelShaderBlob->GetBufferSize(),
+		nullptr,
+		&_pixelShader) ) )
 		return false;
 
 	return true;
@@ -167,12 +181,15 @@ void Renderer::Update() {
 	_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffers, strides, offsets);
 
 	_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	_deviceContext->VSSetShader(_vertexShader.Get(), nullptr, 0);
+	_deviceContext->PSSetShader(_pixelShader.Get(), nullptr, 0);
 }
 
 void Renderer::Render() {
-	// TODO
+	_deviceContext->Draw(6, 0);
 }
 
 void Renderer::Present() {
-	// TODO
+	_swapChain->Present(1, 0);
 }

@@ -29,13 +29,15 @@ private:
 	template<typename T>
 	using ComPtrT = Microsoft::WRL::ComPtr<T>;
 
-	ComPtrT<ID3D11Device> _device = nullptr;
-	ComPtrT<ID3D11DeviceContext> _deviceContext = nullptr;
-	ComPtrT<IDXGISwapChain> _swapChain = nullptr;
+	ComPtrT<ID3D11Device> _device;
+	ComPtrT<ID3D11DeviceContext> _deviceContext;
+	ComPtrT<IDXGISwapChain> _swapChain;
 
-	ComPtrT<ID3D11Buffer> _vertexBuffer = nullptr;
-	ComPtrT<ID3D11Buffer> _indexBuffer = nullptr;
+	ComPtrT<ID3D11Buffer> _vertexBuffer;
+	ComPtrT<ID3D11Buffer> _indexBuffer;
 
-	ComPtrT<ID3DBlob> _vertexShader = nullptr;
-	ComPtrT<ID3DBlob> _pixelShader = nullptr;
+	ComPtrT<ID3DBlob> _vertexShaderBlob;
+	ComPtrT<ID3DBlob> _pixelShaderBlob;
+	ComPtrT<ID3D11VertexShader> _vertexShader;
+	ComPtrT<ID3D11PixelShader> _pixelShader;
 };
