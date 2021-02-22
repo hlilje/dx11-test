@@ -25,14 +25,12 @@ namespace {
 LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_CLOSE: {
-			HMENU hmenu = GetMenu(hwnd);
-			if (hmenu)
+			if (HMENU hmenu = GetMenu(hwnd))
 				DestroyMenu(hmenu);
 			DestroyWindow(hwnd);
 			UnregisterClass(_className.c_str(), _instance);
 			return 0;
-		}
-		case WM_DESTROY: {
+		} case WM_DESTROY: {
 			PostQuitMessage(0);
 			break;
 		}
@@ -72,9 +70,8 @@ bool Window::Create() {
 	renderConfig._width = _width;
 	renderConfig._height = _height;
 	renderConfig._window = _window;
-	if (!_renderer.Create(renderConfig)) {
+	if (!_renderer.Create(renderConfig))
 		return false;
-	}
 
 	return true;
 }

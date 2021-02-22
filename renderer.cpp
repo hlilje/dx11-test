@@ -98,7 +98,7 @@ bool Renderer::CreateResources() {
 	if (FAILED(_device->CreateBuffer(&vertexBufferDesc, &vertexSubresource, &_vertexBuffer)))
 		return false;
 
-	unsigned int indices[] = { 0, 1, 2 };
+	unsigned int indices[] = {0, 1, 2};
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
