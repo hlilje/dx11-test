@@ -16,6 +16,7 @@ public:
 
 private:
 	bool CreateContext(const Config& config);
+	bool CreateRenderTarget();
 	bool CreateResources();
 	bool CreateShaders();
 
@@ -33,6 +34,9 @@ private:
 	ComPtrT<ID3D11DeviceContext> _deviceContext;
 	ComPtrT<IDXGISwapChain> _swapChain;
 
+	ComPtrT<ID3D11Texture2D> _backBuffer;
+	ComPtrT<ID3D11RenderTargetView> _renderTarget;
+
 	ComPtrT<ID3D11Buffer> _vertexBuffer;
 	ComPtrT<ID3D11Buffer> _indexBuffer;
 
@@ -41,4 +45,7 @@ private:
 	ComPtrT<ID3D11VertexShader> _vertexShader;
 	ComPtrT<ID3D11PixelShader> _pixelShader;
 	ComPtrT<ID3D11InputLayout> _inputLayout;
+
+	D3D11_VIEWPORT _viewport;
+	int _indexCount = 0;
 };

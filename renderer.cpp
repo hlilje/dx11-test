@@ -18,8 +18,10 @@ namespace {
 
 
 bool Renderer::Create(const Config& config) {
-
 	if (!CreateContext(config))
+		return false;
+
+	if (!CreateRenderTarget())
 		return false;
 
 	if (!CreateResources())
@@ -73,14 +75,33 @@ bool Renderer::CreateContext(const Config& config) {
 	return !FAILED(deviceSwapChainResult);
 }
 
+bool Renderer::CreateRenderTarget() {
+	if (FAILED(_swapChain->GetBuffer( 0, __uuidof(ID3D11Texture2D), (void**)&_backBuffer)))
+		return false;
+
+	D3D11_TEXTURE2D_DESC backBufferDesc;
+	_backBuffer->GetDesc(&backBufferDesc);
+
+	ZeroMemory(&_viewport, sizeof(D3D11_VIEWPORT));
+	_viewport.Height = (float)backBufferDesc.Height;
+	_viewport.Width = (float)backBufferDesc.Width;
+	_viewport.MinDepth = 0;
+	_viewport.MaxDepth = 1;
+
+	if (FAILED(_device->CreateRenderTargetView(
+		_backBuffer.Get(),
+		nullptr,
+		_renderTarget.GetAddressOf())))
+		return false;
+
+	return true;
+}
+
 bool Renderer::CreateResources() {
 	constexpr Vertex vertices[] = {
-		{0.0f,  0.5f,  0.5f},
-		{0.0f,  0.0f,  0.5f},
-		{0.5f,  -0.5f, 0.5f},
-		{0.5f,  0.0f,  0.0f},
-		{-0.5f, -0.5f, 0.5f},
-		{0.0f,  0.5f,  0.0f},
+		{{ 0.0f,  0.5f, 0.5f}, {0.0f, 0.0f, 0.5f}},
+		{{ 0.5f, -0.5f, 0.5f}, {0.5f, 0.0f, 0.0f}},
+		{{-0.5f, -0.5f, 0.5f}, {0.0f, 0.5f, 0.0f}},
 	};
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
@@ -98,7 +119,8 @@ bool Renderer::CreateResources() {
 	if (FAILED(_device->CreateBuffer(&vertexBufferDesc, &vertexSubresource, &_vertexBuffer)))
 		return false;
 
-	unsigned int indices[] = {0, 1, 2};
+	constexpr unsigned int indices[] = {0, 1, 2};
+	_indexCount = ARRAYSIZE(indices);
 
 	D3D11_BUFFER_DESC indexBufferDesc;
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -156,7 +178,7 @@ bool Renderer::CreateShaders() {
 }
 
 bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob) {
-	const D3D_SHADER_MACRO defines[1] = {};
+	constexpr D3D_SHADER_MACRO defines[1] = {};
 	ID3DBlob* shaderBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
 	HRESULT result = D3DCompileFromFile(
@@ -188,20 +210,32 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 }
 
 void Renderer::Update() {
-	ID3D11Buffer* vertexBuffers = {_vertexBuffer.Get()};
-	constexpr UINT strides[] = {0};
-	constexpr UINT offsets[] = {0};
-	_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffers, strides, offsets);
-	_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-
-	_deviceContext->IASetInputLayout(_inputLayout.Get());
-
-	_deviceContext->VSSetShader(_vertexShader.Get(), nullptr, 0);
-	_deviceContext->PSSetShader(_pixelShader.Get(), nullptr, 0);
+	// Static data
 }
 
 void Renderer::Render() {
-	_deviceContext->Draw(6, 0);
+	constexpr float black[] = {0.0f, 0.0f, 0.0f, 1.0f};
+	_deviceContext->ClearRenderTargetView(_renderTarget.Get(), black);
+
+	ID3D11RenderTargetView* renderTargets[] = {_renderTarget.Get()};
+	_deviceContext->OMSetRenderTargets(ARRAYSIZE(renderTargets), renderTargets, nullptr);
+
+	D3D11_VIEWPORT viewports[] = {_viewport};
+	_deviceContext->RSSetViewports(ARRAYSIZE(viewports), viewports);
+
+	ID3D11Buffer* vertexBuffers[] = {_vertexBuffer.Get()};
+	constexpr UINT strides[] = {0};
+	constexpr UINT offsets[] = {0};
+	_deviceContext->IASetVertexBuffers(0, ARRAYSIZE(vertexBuffers), vertexBuffers, strides, offsets);
+	_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	_deviceContext->IASetInputLayout(_inputLayout.Get());
+	_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	_deviceContext->VSSetShader(_vertexShader.Get(), nullptr, 0);
+	_deviceContext->PSSetShader(_pixelShader.Get(), nullptr, 0);
+
+	_deviceContext->DrawIndexed(_indexCount, 0, 0);
 }
 
 void Renderer::Present() {
