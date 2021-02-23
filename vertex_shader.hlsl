@@ -8,8 +8,7 @@ struct VS_OUTPUT {
     float3 _Color       : COLOR;
 };
 
-VS_OUTPUT main(VS_INPUT Input)
-{
+VS_OUTPUT main(VS_INPUT Input) {
     VS_OUTPUT Output;
 
     Output._Position = float4(Input._Position, 1.0f);
