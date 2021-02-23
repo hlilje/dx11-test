@@ -60,7 +60,16 @@ bool Window::Create() {
 			return false;
 	}
 
-	_window = CreateWindow(wndClass.lpszClassName, L"DX11 Test", WS_OVERLAPPEDWINDOW, 0, 0, _width, _height, nullptr, nullptr, _instance, nullptr );
+	_window = CreateWindow(
+		wndClass.lpszClassName,
+		L"DX11 Test",
+		WS_OVERLAPPEDWINDOW, 0, 0,
+		_width, _height,
+		nullptr,
+		nullptr,
+		_instance,
+		nullptr);
+
 	if (!_window) {
 		if (CheckHadError())
 			return false;
