@@ -74,7 +74,7 @@ bool Renderer::CreateContext(const Config& config) {
 }
 
 bool Renderer::CreateResources() {
-	Vertex vertices[] = {
+	constexpr Vertex vertices[] = {
 		{0.0f,  0.5f,  0.5f},
 		{0.0f,  0.0f,  0.5f},
 		{0.5f,  -0.5f, 0.5f},
@@ -139,6 +139,19 @@ bool Renderer::CreateShaders() {
 		&_pixelShader) ) )
 		return false;
 
+	constexpr D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	if (FAILED( _device->CreateInputLayout(
+		inputLayoutDesc,
+		ARRAYSIZE(inputLayoutDesc),
+		_vertexShaderBlob->GetBufferPointer(),
+		_vertexShaderBlob->GetBufferSize(),
+		&_inputLayout )))
+		return false;
+
 	return true;
 }
 
@@ -176,11 +189,12 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 
 void Renderer::Update() {
 	ID3D11Buffer* vertexBuffers = {_vertexBuffer.Get()};
-	UINT strides[] = {0};
-	UINT offsets[] = {0};
+	constexpr UINT strides[] = {0};
+	constexpr UINT offsets[] = {0};
 	_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffers, strides, offsets);
-
 	_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	_deviceContext->IASetInputLayout(_inputLayout.Get());
 
 	_deviceContext->VSSetShader(_vertexShader.Get(), nullptr, 0);
 	_deviceContext->PSSetShader(_pixelShader.Get(), nullptr, 0);

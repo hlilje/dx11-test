@@ -40,4 +40,5 @@ private:
 	ComPtrT<ID3DBlob> _pixelShaderBlob;
 	ComPtrT<ID3D11VertexShader> _vertexShader;
 	ComPtrT<ID3D11PixelShader> _pixelShader;
+	ComPtrT<ID3D11InputLayout> _inputLayout;
 };
