@@ -224,7 +224,7 @@ void Renderer::Render() {
 	_deviceContext->RSSetViewports(ARRAYSIZE(viewports), viewports);
 
 	ID3D11Buffer* vertexBuffers[] = {_vertexBuffer.Get()};
-	constexpr UINT strides[] = {0};
+	UINT strides[] = {sizeof(Vertex)};
 	constexpr UINT offsets[] = {0};
 	_deviceContext->IASetVertexBuffers(0, ARRAYSIZE(vertexBuffers), vertexBuffers, strides, offsets);
 	_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

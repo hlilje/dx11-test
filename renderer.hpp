@@ -47,5 +47,5 @@ private:
 	ComPtrT<ID3D11InputLayout> _inputLayout;
 
 	D3D11_VIEWPORT _viewport;
-	int _indexCount = 0;
+	UINT _indexCount = 0;
 };
