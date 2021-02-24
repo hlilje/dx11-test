@@ -11,8 +11,8 @@ namespace {
 	};
 
 	struct Vertex {
-		Float3 _Position;
-		Float3 _Color;
+		Float3 _position;
+		Float3 _color;
 	};
 }
 
