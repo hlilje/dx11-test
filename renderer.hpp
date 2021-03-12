@@ -2,6 +2,7 @@
 
 #include <wrl.h>
 #include <d3d11.h>
+#include <DirectXMath.h>
 
 
 class Renderer {
@@ -19,6 +20,7 @@ private:
 	bool CreateRenderTarget();
 	bool CreateResources();
 	bool CreateShaders();
+	void CreateMatrices();
 
 	bool CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob);
 
@@ -36,6 +38,8 @@ private:
 
 	ComPtrT<ID3D11Texture2D> _backBuffer;
 	ComPtrT<ID3D11RenderTargetView> _renderTarget;
+	UINT _backBufferWidth = 0;
+	UINT _backBufferHeight = 0;
 
 	ComPtrT<ID3D11Buffer> _vertexBuffer;
 	ComPtrT<ID3D11Buffer> _indexBuffer;
@@ -48,4 +52,10 @@ private:
 
 	D3D11_VIEWPORT _viewport;
 	UINT _indexCount = 0;
+
+	DirectX::XMFLOAT4X4 _world;
+	DirectX::XMFLOAT4X4 _view;
+	DirectX::XMFLOAT4X4 _projection;
+
+	unsigned int _frame = 0;
 };

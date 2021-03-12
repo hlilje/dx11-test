@@ -2,13 +2,13 @@
 
 #include <d3dcompiler.h>
 
+#include <cmath>
+
 
 namespace {
-	struct Float3 {
-		float _x = 0.0f;
-		float _y = 0.0f;
-		float _z = 0.0f;
-	};
+	using Float3 = DirectX::XMFLOAT3;
+	using Vector = DirectX::XMVECTOR;
+	using Matrix = DirectX::XMMATRIX;
 
 	struct Vertex {
 		Float3 _position;
@@ -37,6 +37,8 @@ void Renderer::Run() {
 	Update();
 	Render();
 	Present();
+
+	++_frame;
 }
 
 bool Renderer::CreateContext(const Config& config) {
@@ -83,8 +85,8 @@ bool Renderer::CreateRenderTarget() {
 	_backBuffer->GetDesc(&backBufferDesc);
 
 	ZeroMemory(&_viewport, sizeof(D3D11_VIEWPORT));
-	_viewport.Height = (float)backBufferDesc.Height;
-	_viewport.Width = (float)backBufferDesc.Width;
+	_viewport.Height = (float)(_backBufferHeight = backBufferDesc.Height);
+	_viewport.Width = (float)(_backBufferWidth = backBufferDesc.Width);
 	_viewport.MinDepth = 0;
 	_viewport.MaxDepth = 1;
 
@@ -99,9 +101,14 @@ bool Renderer::CreateRenderTarget() {
 
 bool Renderer::CreateResources() {
 	constexpr Vertex vertices[] = {
-		{{ 0.0f,  0.5f, 0.5f}, {0.0f, 0.0f, 0.5f}},
-		{{ 0.5f, -0.5f, 0.5f}, {0.5f, 0.0f, 0.0f}},
-		{{-0.5f, -0.5f, 0.5f}, {0.0f, 0.5f, 0.0f}},
+		{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}},
+		{{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}},
+		{{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+		{{-0.5f,  0.5f,  0.5f}, {0.0f, 1.0f, 1.0f}},
+		{{ 0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		{{ 0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 1.0f}},
+		{{ 0.5f,  0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}},
+		{{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}}
 	};
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
@@ -119,7 +126,14 @@ bool Renderer::CreateResources() {
 	if (FAILED(_device->CreateBuffer(&vertexBufferDesc, &vertexSubresource, &_vertexBuffer)))
 		return false;
 
-	constexpr unsigned int indices[] = {0, 1, 2};
+	constexpr unsigned int indices[] = {
+		0,2,1, 1,2,3,
+		4,5,6, 5,7,6,
+		0,1,5, 0,5,4,
+		2,6,7, 2,7,3,
+		0,4,6, 0,6,2,
+		1,3,7, 1,7,5,
+	};
 	_indexCount = ARRAYSIZE(indices);
 
 	D3D11_BUFFER_DESC indexBufferDesc;
@@ -177,6 +191,24 @@ bool Renderer::CreateShaders() {
 	return true;
 }
 
+void Renderer::CreateMatrices() {
+	const Vector eye = DirectX::XMVectorSet(0.0f, 0.7f, 1.5f, 0.f);
+	const Vector at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.f);
+	const Vector up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.f);
+
+	const Matrix lookAt = DirectX::XMMatrixLookAtRH(eye, at, up);
+	const Matrix lookAtT = DirectX::XMMatrixTranspose(lookAt);
+	DirectX::XMStoreFloat4x4(&_view, lookAtT);
+
+	const float aspectRatioX = (float)_backBufferWidth / (float)_backBufferHeight;
+	const float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
+	const float fovAngleY = 2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY);
+
+	const Matrix perspective = DirectX::XMMatrixPerspectiveFovRH(fovAngleY, aspectRatioX, 0.01f, 100.0f); 
+	const Matrix perspectiveT = DirectX::XMMatrixTranspose(perspective);
+	DirectX::XMStoreFloat4x4(&_projection, perspectiveT);
+}
+
 bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob) {
 	constexpr D3D_SHADER_MACRO defines[1] = {};
 	ID3DBlob* shaderBlob = nullptr;
@@ -210,7 +242,10 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 }
 
 void Renderer::Update() {
-	// Static data
+	const float radians = DirectX::XMConvertToRadians((float)_frame++);
+	const Matrix rotation = DirectX::XMMatrixRotationY(radians);
+	const Matrix rotationT = DirectX::XMMatrixTranspose(rotation);
+	DirectX::XMStoreFloat4x4(&_world, rotationT);
 }
 
 void Renderer::Render() {
