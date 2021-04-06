@@ -59,6 +59,7 @@ private:
 		DirectX::XMFLOAT4X4 _view;
 		DirectX::XMFLOAT4X4 _projection;
 	} _constantBufferData;
+	static_assert((sizeof(ConstantBufferData) % 16) == 0, "Constant Buffer size must be 16-byte aligned");
 
 	unsigned int _frame = 0;
 };
