@@ -18,6 +18,7 @@ public:
 private:
 	bool CreateContext(const Config& config);
 	bool CreateRenderTarget();
+	bool CreateDepthStencil();
 	bool CreateResources();
 	bool CreateShaders();
 	void CreateMatrices();
@@ -40,6 +41,9 @@ private:
 	ComPtrT<ID3D11RenderTargetView> _renderTarget;
 	UINT _backBufferWidth = 0;
 	UINT _backBufferHeight = 0;
+
+	ComPtrT<ID3D11Texture2D> _depthStencil;
+	ComPtrT<ID3D11DepthStencilView> _depthStencilView;
 
 	ComPtrT<ID3D11Buffer> _vertexBuffer;
 	ComPtrT<ID3D11Buffer> _indexBuffer;

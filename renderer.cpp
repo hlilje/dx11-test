@@ -3,6 +3,7 @@
 #include <d3dcompiler.h>
 
 #include <cmath>
+#include <iostream>
 
 
 namespace {
@@ -19,18 +20,27 @@ namespace {
 
 bool Renderer::Create(const Config& config) {
 	if (!CreateContext(config)) {
+		std::cout << "Failed creating render context" << std::endl;
 		return false;
 	}
 
 	if (!CreateRenderTarget()) {
+		std::cout << "Failed creating render target" << std::endl;
+		return false;
+	}
+
+	if (!CreateDepthStencil()) {
+		std::cout << "Failed creating depth stencil" << std::endl;
 		return false;
 	}
 
 	if (!CreateResources()) {
+		std::cout << "Failed creating resources" << std::endl;
 		return false;
 	}
 
 	if (!CreateShaders()) {
+		std::cout << "Failed creating shaders" << std::endl;
 		return false;
 	}
 
@@ -105,6 +115,32 @@ bool Renderer::CreateRenderTarget() {
 	return true;
 }
 
+bool Renderer::CreateDepthStencil() {
+	const CD3D11_TEXTURE2D_DESC depthStencilDesc(
+		DXGI_FORMAT_D24_UNORM_S8_UINT,
+		_backBufferWidth,
+		_backBufferHeight,
+		1,
+		1,
+		D3D11_BIND_DEPTH_STENCIL
+	);
+
+	if (FAILED(_device->CreateTexture2D(&depthStencilDesc, nullptr, &_depthStencil))) {
+		return false;
+	}
+
+	const CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
+
+	if (FAILED(_device->CreateDepthStencilView(
+		_depthStencil.Get(),
+		&depthStencilViewDesc,
+		&_depthStencilView))) {
+		return false;
+	}
+
+	return true;
+}
+
 bool Renderer::CreateResources() {
 	constexpr Vertex vertices[] = {
 		{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}},
@@ -161,7 +197,7 @@ bool Renderer::CreateResources() {
 
 	CreateMatrices();
 
-	CD3D11_BUFFER_DESC constantBufferDesc(
+	const CD3D11_BUFFER_DESC constantBufferDesc(
 		sizeof(_constantBufferData),
 		D3D11_BIND_CONSTANT_BUFFER
 	);
@@ -237,7 +273,7 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 	constexpr D3D_SHADER_MACRO defines[1] = {};
 	ID3DBlob* shaderBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
-	HRESULT result = D3DCompileFromFile(
+	const HRESULT result = D3DCompileFromFile(
 		srcFile,
 		defines,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,
@@ -278,9 +314,10 @@ void Renderer::Update() {
 void Renderer::Render() {
 	constexpr float black[] = {0.0f, 0.0f, 0.0f, 1.0f};
 	_deviceContext->ClearRenderTargetView(_renderTarget.Get(), black);
+	_deviceContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	ID3D11RenderTargetView* renderTargets[] = {_renderTarget.Get()};
-	_deviceContext->OMSetRenderTargets(ARRAYSIZE(renderTargets), renderTargets, nullptr);
+	_deviceContext->OMSetRenderTargets(ARRAYSIZE(renderTargets), renderTargets, _depthStencilView.Get());
 
 	D3D11_VIEWPORT viewports[] = {_viewport};
 	_deviceContext->RSSetViewports(ARRAYSIZE(viewports), viewports);
