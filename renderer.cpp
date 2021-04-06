@@ -153,14 +153,10 @@ bool Renderer::CreateResources() {
 		{{ 0.5f,  0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}}
 	};
 
-	D3D11_BUFFER_DESC vertexBufferDesc;
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(Vertex) * 3;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
+	const CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
 
 	D3D11_SUBRESOURCE_DATA vertexSubresource;
+	ZeroMemory(&vertexSubresource, sizeof(D3D11_SUBRESOURCE_DATA));
 	vertexSubresource.pSysMem = vertices;
 	vertexSubresource.SysMemPitch = 0;
 	vertexSubresource.SysMemSlicePitch = 0;
@@ -179,14 +175,10 @@ bool Renderer::CreateResources() {
 	};
 	_indexCount = ARRAYSIZE(indices);
 
-	D3D11_BUFFER_DESC indexBufferDesc;
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned int) * 3;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
+	const CD3D11_BUFFER_DESC indexBufferDesc(sizeof(indices), D3D11_BIND_INDEX_BUFFER);
 
 	D3D11_SUBRESOURCE_DATA indexSubresource;
+	ZeroMemory(&indexSubresource, sizeof(D3D11_SUBRESOURCE_DATA));
 	indexSubresource.pSysMem = indices;
 	indexSubresource.SysMemPitch = 0;
 	indexSubresource.SysMemSlicePitch = 0;
