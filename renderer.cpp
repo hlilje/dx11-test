@@ -18,17 +18,21 @@ namespace {
 
 
 bool Renderer::Create(const Config& config) {
-	if (!CreateContext(config))
+	if (!CreateContext(config)) {
 		return false;
+	}
 
-	if (!CreateRenderTarget())
+	if (!CreateRenderTarget()) {
 		return false;
+	}
 
-	if (!CreateResources())
+	if (!CreateResources()) {
 		return false;
+	}
 
-	if (!CreateShaders())
+	if (!CreateShaders()) {
 		return false;
+	}
 
 	return true;
 }
@@ -78,8 +82,9 @@ bool Renderer::CreateContext(const Config& config) {
 }
 
 bool Renderer::CreateRenderTarget() {
-	if (FAILED(_swapChain->GetBuffer( 0, __uuidof(ID3D11Texture2D), (void**)&_backBuffer)))
+	if (FAILED(_swapChain->GetBuffer( 0, __uuidof(ID3D11Texture2D), (void**)&_backBuffer))) {
 		return false;
+	}
 
 	D3D11_TEXTURE2D_DESC backBufferDesc;
 	_backBuffer->GetDesc(&backBufferDesc);
@@ -93,8 +98,9 @@ bool Renderer::CreateRenderTarget() {
 	if (FAILED(_device->CreateRenderTargetView(
 		_backBuffer.Get(),
 		nullptr,
-		_renderTarget.GetAddressOf())))
+		_renderTarget.GetAddressOf()))) {
 		return false;
+	}
 
 	return true;
 }
@@ -123,8 +129,9 @@ bool Renderer::CreateResources() {
 	vertexSubresource.SysMemPitch = 0;
 	vertexSubresource.SysMemSlicePitch = 0;
 
-	if (FAILED(_device->CreateBuffer(&vertexBufferDesc, &vertexSubresource, &_vertexBuffer)))
+	if (FAILED(_device->CreateBuffer(&vertexBufferDesc, &vertexSubresource, &_vertexBuffer))) {
 		return false;
+	}
 
 	constexpr unsigned int indices[] = {
 		0,2,1, 1,2,3,
@@ -148,32 +155,37 @@ bool Renderer::CreateResources() {
 	indexSubresource.SysMemPitch = 0;
 	indexSubresource.SysMemSlicePitch = 0;
 
-	if (FAILED(_device->CreateBuffer(&indexBufferDesc, &indexSubresource, &_indexBuffer)))
+	if (FAILED(_device->CreateBuffer(&indexBufferDesc, &indexSubresource, &_indexBuffer))) {
 		return false;
+	}
 
 	return true;
 }
 
 bool Renderer::CreateShaders() {
-	if (!CompileShader(L"vertex_shader.hlsl", "main", "vs_5_0", &_vertexShaderBlob))
+	if (!CompileShader(L"vertex_shader.hlsl", "main", "vs_5_0", &_vertexShaderBlob)) {
 		return false;
+	}
 
 	if (FAILED(_device->CreateVertexShader(
 		_vertexShaderBlob->GetBufferPointer(),
 		_vertexShaderBlob->GetBufferSize(),
 		nullptr,
-		&_vertexShader) ) )
+		&_vertexShader) ) ) {
 		return false;
+	}
 
-	if (!CompileShader(L"pixel_shader.hlsl", "main", "ps_5_0", &_pixelShaderBlob))
+	if (!CompileShader(L"pixel_shader.hlsl", "main", "ps_5_0", &_pixelShaderBlob)) {
 		return false;
+	}
 
 	if (FAILED(_device->CreatePixelShader(
 		_pixelShaderBlob->GetBufferPointer(),
 		_pixelShaderBlob->GetBufferSize(),
 		nullptr,
-		&_pixelShader) ) )
+		&_pixelShader) ) ) {
 		return false;
+	}
 
 	constexpr D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -185,8 +197,9 @@ bool Renderer::CreateShaders() {
 		ARRAYSIZE(inputLayoutDesc),
 		_vertexShaderBlob->GetBufferPointer(),
 		_vertexShaderBlob->GetBufferSize(),
-		&_inputLayout )))
+		&_inputLayout ))) {
 		return false;
+	}
 
 	return true;
 }
@@ -224,14 +237,15 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 		&shaderBlob,
 		&errorBlob);
 
-	if(FAILED(result)) {
-		if(errorBlob) {
+	if (FAILED(result)) {
+		if (errorBlob) {
 			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
 			errorBlob->Release();
 		}
 
-		if(shaderBlob)
+		if (shaderBlob) {
 			shaderBlob->Release();
+		}
 
 		return false;
 	}
@@ -259,7 +273,7 @@ void Renderer::Render() {
 	_deviceContext->RSSetViewports(ARRAYSIZE(viewports), viewports);
 
 	ID3D11Buffer* vertexBuffers[] = {_vertexBuffer.Get()};
-	UINT strides[] = {sizeof(Vertex)};
+	constexpr UINT strides[] = {sizeof(Vertex)};
 	constexpr UINT offsets[] = {0};
 	_deviceContext->IASetVertexBuffers(0, ARRAYSIZE(vertexBuffers), vertexBuffers, strides, offsets);
 	_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

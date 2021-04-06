@@ -4,8 +4,9 @@
 int main() {
 	Window window;
 
-	if (!window.Create())
+	if (!window.Create()) {
 		return -1;
+	}
 
 	window.Run();
 

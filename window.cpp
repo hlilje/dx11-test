@@ -11,8 +11,9 @@ HINSTANCE Window::_instance = nullptr;
 namespace {
 	bool CheckHadError() {
 		const DWORD error = GetLastError();
-		if (!error)
+		if (!error) {
 			return false;
+		}
 
 		const _com_error comError(HRESULT_FROM_WIN32(error));
 		std::wcout << "ERROR: " << comError.ErrorMessage() << std::endl;
@@ -25,8 +26,9 @@ namespace {
 LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_CLOSE: {
-			if (HMENU hmenu = GetMenu(hwnd))
+			if (HMENU hmenu = GetMenu(hwnd)) {
 				DestroyMenu(hmenu);
+			}
 			DestroyWindow(hwnd);
 			UnregisterClass(_className.c_str(), _instance);
 			return 0;
@@ -56,8 +58,9 @@ bool Window::Create() {
 
 	if (!RegisterClass(&wndClass))
 	{
-		if (CheckHadError())
+		if (CheckHadError()) {
 			return false;
+		}
 	}
 
 	_window = CreateWindow(
@@ -71,23 +74,26 @@ bool Window::Create() {
 		nullptr);
 
 	if (!_window) {
-		if (CheckHadError())
+		if (CheckHadError()) {
 			return false;
+		}
 	}
 
 	Renderer::Config renderConfig;
 	renderConfig._width = _width;
 	renderConfig._height = _height;
 	renderConfig._window = _window;
-	if (!_renderer.Create(renderConfig))
+	if (!_renderer.Create(renderConfig)) {
 		return false;
+	}
 
 	return true;
 }
 
 void Window::Run() {
-	if (!IsWindowVisible(_window))
+	if (!IsWindowVisible(_window)) {
 		ShowWindow(_window, SW_SHOW);
+	}
 
 	MSG message;
 	message.message = WM_NULL;
