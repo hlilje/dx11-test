@@ -43,6 +43,7 @@ private:
 
 	ComPtrT<ID3D11Buffer> _vertexBuffer;
 	ComPtrT<ID3D11Buffer> _indexBuffer;
+	ComPtrT<ID3D11Buffer> _constantBuffer;
 
 	ComPtrT<ID3DBlob> _vertexShaderBlob;
 	ComPtrT<ID3DBlob> _pixelShaderBlob;
@@ -53,9 +54,11 @@ private:
 	D3D11_VIEWPORT _viewport;
 	UINT _indexCount = 0;
 
-	DirectX::XMFLOAT4X4 _world;
-	DirectX::XMFLOAT4X4 _view;
-	DirectX::XMFLOAT4X4 _projection;
+	struct ConstantBufferData {
+		DirectX::XMFLOAT4X4 _world;
+		DirectX::XMFLOAT4X4 _view;
+		DirectX::XMFLOAT4X4 _projection;
+	} _constantBufferData;
 
 	unsigned int _frame = 0;
 };

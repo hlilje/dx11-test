@@ -159,6 +159,15 @@ bool Renderer::CreateResources() {
 		return false;
 	}
 
+	CD3D11_BUFFER_DESC constantBufferDesc(
+		sizeof(_constantBufferData),
+		D3D11_BIND_CONSTANT_BUFFER
+	);
+
+	if (FAILED(_device->CreateBuffer(&constantBufferDesc, nullptr, &_constantBuffer))) {
+		return false;
+	}
+
 	return true;
 }
 
@@ -211,7 +220,7 @@ void Renderer::CreateMatrices() {
 
 	const Matrix lookAt = DirectX::XMMatrixLookAtRH(eye, at, up);
 	const Matrix lookAtT = DirectX::XMMatrixTranspose(lookAt);
-	DirectX::XMStoreFloat4x4(&_view, lookAtT);
+	DirectX::XMStoreFloat4x4(&_constantBufferData._view, lookAtT);
 
 	const float aspectRatioX = (float)_backBufferWidth / (float)_backBufferHeight;
 	const float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
@@ -219,7 +228,7 @@ void Renderer::CreateMatrices() {
 
 	const Matrix perspective = DirectX::XMMatrixPerspectiveFovRH(fovAngleY, aspectRatioX, 0.01f, 100.0f); 
 	const Matrix perspectiveT = DirectX::XMMatrixTranspose(perspective);
-	DirectX::XMStoreFloat4x4(&_projection, perspectiveT);
+	DirectX::XMStoreFloat4x4(&_constantBufferData._projection, perspectiveT);
 }
 
 bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob) {
@@ -259,7 +268,9 @@ void Renderer::Update() {
 	const float radians = DirectX::XMConvertToRadians((float)_frame++);
 	const Matrix rotation = DirectX::XMMatrixRotationY(radians);
 	const Matrix rotationT = DirectX::XMMatrixTranspose(rotation);
-	DirectX::XMStoreFloat4x4(&_world, rotationT);
+	DirectX::XMStoreFloat4x4(&_constantBufferData._world, rotationT);
+
+	_deviceContext->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_constantBufferData, 0, 0);
 }
 
 void Renderer::Render() {
@@ -277,6 +288,9 @@ void Renderer::Render() {
 	constexpr UINT offsets[] = {0};
 	_deviceContext->IASetVertexBuffers(0, ARRAYSIZE(vertexBuffers), vertexBuffers, strides, offsets);
 	_deviceContext->IASetIndexBuffer(_indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+
+	ID3D11Buffer* constantBuffers[] = {_constantBuffer.Get()};
+	_deviceContext->VSSetConstantBuffers(0, ARRAYSIZE(constantBuffers), constantBuffers);
 
 	_deviceContext->IASetInputLayout(_inputLayout.Get());
 	_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
