@@ -159,6 +159,8 @@ bool Renderer::CreateResources() {
 		return false;
 	}
 
+	CreateMatrices();
+
 	CD3D11_BUFFER_DESC constantBufferDesc(
 		sizeof(_constantBufferData),
 		D3D11_BIND_CONSTANT_BUFFER
