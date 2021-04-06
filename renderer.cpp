@@ -20,27 +20,27 @@ namespace {
 
 bool Renderer::Create(const Config& config) {
 	if (!CreateContext(config)) {
-		std::cout << "Failed creating render context" << std::endl;
+		std::cerr << "Failed creating render context" << std::endl;
 		return false;
 	}
 
 	if (!CreateRenderTarget()) {
-		std::cout << "Failed creating render target" << std::endl;
+		std::cerr << "Failed creating render target" << std::endl;
 		return false;
 	}
 
 	if (!CreateDepthStencil()) {
-		std::cout << "Failed creating depth stencil" << std::endl;
+		std::cerr << "Failed creating depth stencil" << std::endl;
 		return false;
 	}
 
 	if (!CreateResources()) {
-		std::cout << "Failed creating resources" << std::endl;
+		std::cerr << "Failed creating resources" << std::endl;
 		return false;
 	}
 
 	if (!CreateShaders()) {
-		std::cout << "Failed creating shaders" << std::endl;
+		std::cerr << "Failed creating shaders" << std::endl;
 		return false;
 	}
 

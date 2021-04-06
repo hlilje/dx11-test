@@ -16,7 +16,7 @@ namespace {
 		}
 
 		const _com_error comError(HRESULT_FROM_WIN32(error));
-		std::wcout << "ERROR: " << comError.ErrorMessage() << std::endl;
+		std::wcerr << "ERROR: " << comError.ErrorMessage() << std::endl;
 
 		return true;
 	}
