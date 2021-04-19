@@ -358,11 +358,10 @@ void Renderer::Present() {
 void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY) {
 	const float deltaAngleX = (2.0f * (float)M_PI) / _viewport.Width;
 	float deltaAngleY = (float)M_PI / _viewport.Height;
-	const float angleX = (_lastMousePosX - mousePosX) * deltaAngleX;
-	const float angleY = (_lastMousePosY - mousePosY) * deltaAngleY;
 
 	const Vector viewDir = DirectX::XMVectorNegate(_projection._view.r[2]);
 	const float cosAngle = DirectX::XMVectorGetX(DirectX::XMVector3Dot(viewDir, _camera._at));
+	// TODO: Never hit
 	if (cosAngle * sgn(deltaAngleY) > 0.99f) {
 		deltaAngleY = 0.0f;
 	}
@@ -370,10 +369,12 @@ void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY) {
 	Vector position = DirectX::XMVectorSetW(_camera._eye, 1.0f);
 	Vector pivot = DirectX::XMVectorSetW(_camera._at, 1.0f);
 
+	const float angleX = (_lastMousePosX - mousePosX) * deltaAngleX;
 	const Matrix rotMatrixX = DirectX::XMMatrixRotationAxis(_camera._up, angleX);
 	position = DirectX::XMVectorAdd(DirectX::XMVector3Transform(
 		DirectX::XMVectorSubtract(position, pivot), rotMatrixX), pivot);
 
+	const float angleY = (_lastMousePosY - mousePosY) * deltaAngleY;
 	const Vector rightVec = _projection._view.r[0];
 	const Matrix rotMatrixY = DirectX::XMMatrixRotationAxis(rightVec, angleY);
 	const Vector cameraPos = DirectX::XMVectorAdd(
