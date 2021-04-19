@@ -56,8 +56,7 @@ bool Window::Create() {
 	wndClass.lpszMenuName = nullptr;
 	wndClass.lpszClassName = _className.c_str();
 
-	if (!RegisterClass(&wndClass))
-	{
+	if (!RegisterClass(&wndClass)) {
 		if (CheckHadError()) {
 			return false;
 		}
@@ -98,8 +97,7 @@ void Window::Run() {
 	MSG message;
 	message.message = WM_NULL;
 
-	while (message.message != WM_QUIT)
-	{
+	while (message.message != WM_QUIT) {
 		if (PeekMessage(&message, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&message);
 			DispatchMessage(&message);

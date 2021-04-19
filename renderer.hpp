@@ -31,29 +31,29 @@ private:
 
 private:
 	template<typename T>
-	using ComPtrT = Microsoft::WRL::ComPtr<T>;
+	using ComPtr = Microsoft::WRL::ComPtr<T>;
 
-	ComPtrT<ID3D11Device> _device;
-	ComPtrT<ID3D11DeviceContext> _deviceContext;
-	ComPtrT<IDXGISwapChain> _swapChain;
+	ComPtr<ID3D11Device> _device;
+	ComPtr<ID3D11DeviceContext> _deviceContext;
+	ComPtr<IDXGISwapChain> _swapChain;
 
-	ComPtrT<ID3D11Texture2D> _backBuffer;
-	ComPtrT<ID3D11RenderTargetView> _renderTarget;
+	ComPtr<ID3D11Texture2D> _backBuffer;
+	ComPtr<ID3D11RenderTargetView> _renderTarget;
 	UINT _backBufferWidth = 0;
 	UINT _backBufferHeight = 0;
 
-	ComPtrT<ID3D11Texture2D> _depthStencil;
-	ComPtrT<ID3D11DepthStencilView> _depthStencilView;
+	ComPtr<ID3D11Texture2D> _depthStencil;
+	ComPtr<ID3D11DepthStencilView> _depthStencilView;
 
-	ComPtrT<ID3D11Buffer> _vertexBuffer;
-	ComPtrT<ID3D11Buffer> _indexBuffer;
-	ComPtrT<ID3D11Buffer> _constantBuffer;
+	ComPtr<ID3D11Buffer> _vertexBuffer;
+	ComPtr<ID3D11Buffer> _indexBuffer;
+	ComPtr<ID3D11Buffer> _constantBuffer;
 
-	ComPtrT<ID3DBlob> _vertexShaderBlob;
-	ComPtrT<ID3DBlob> _pixelShaderBlob;
-	ComPtrT<ID3D11VertexShader> _vertexShader;
-	ComPtrT<ID3D11PixelShader> _pixelShader;
-	ComPtrT<ID3D11InputLayout> _inputLayout;
+	ComPtr<ID3DBlob> _vertexShaderBlob;
+	ComPtr<ID3DBlob> _pixelShaderBlob;
+	ComPtr<ID3D11VertexShader> _vertexShader;
+	ComPtr<ID3D11PixelShader> _pixelShader;
+	ComPtr<ID3D11InputLayout> _inputLayout;
 
 	D3D11_VIEWPORT _viewport;
 	UINT _indexCount = 0;
