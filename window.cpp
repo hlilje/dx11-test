@@ -102,7 +102,10 @@ void Window::Run() {
 			TranslateMessage(&message);
 			DispatchMessage(&message);
 		} else {
-			_renderer.Run();
+			POINT point;
+			GetCursorPos(&point);
+			ScreenToClient(_window, &point);
+			_renderer.Run(point.x, point.y);
 		}
 	}
 }

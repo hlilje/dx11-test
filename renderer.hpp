@@ -13,9 +13,11 @@ public:
 		HWND _window = nullptr;
 	};
 	bool Create(const Config& config);
-	void Run();
+	void Run(long mousePosX, long mousePosY);
 
 private:
+	using Vector = DirectX::XMVECTOR;
+
 	bool CreateContext(const Config& config);
 	bool CreateRenderTarget();
 	bool CreateDepthStencil();
@@ -23,14 +25,16 @@ private:
 	bool CreateShaders();
 	void CreateMatrices();
 
+	void CreateViewMatrix(const Vector& eye, const Vector& at, const Vector& up);
 	bool CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob);
 
-	void Update();
+	void Update(long mousePosX, long mousePosY);
 	void Render();
 	void Present();
 
+	void UpdateArcballCamera(long mousePosX, long mousePosY);
+
 private:
-	using Vector = DirectX::XMVECTOR;
 	using Matrix = DirectX::XMMATRIX;
 
 	template<typename T>
@@ -61,16 +65,23 @@ private:
 	D3D11_VIEWPORT _viewport;
 	UINT _indexCount = 0;
 
-	struct ProjectionMatrices {
+	long _lastMousePosX = 0;
+	long _lastMousePosY = 0;
+
+	struct Camera {
+		Vector _eye;
+		Vector _at;
+		Vector _up;
+	} _camera;
+
+	struct Projection {
 		Matrix _model;
 		Matrix _view;
 		Matrix _projection;
-	} _projectionMatrices;
+	} _projection;
 
 	struct ConstantBufferData {
 		DirectX::XMFLOAT4X4 _mvp;
 	} _constantBufferData;
 	static_assert((sizeof(ConstantBufferData) % 16) == 0, "Constant Buffer size must be 16-byte aligned");
-
-	unsigned int _frame = 0;
 };
