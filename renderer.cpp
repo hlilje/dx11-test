@@ -252,11 +252,14 @@ void Renderer::CreateMatrices() {
 	const Matrix lookAt = DirectX::XMMatrixLookAtRH(eye, at, up);
 	_projectionMatrices._view = DirectX::XMMatrixTranspose(lookAt);
 
-	const float aspectRatioX = (float)_backBufferWidth / (float)_backBufferHeight;
-	const float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
-	const float fovAngleY = 2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY);
+	const float aspectRatio = (float)_backBufferWidth / (float)_backBufferHeight;
+	const float ratio = aspectRatio < (16.0f / 9.0f) ? aspectRatio / (16.0f / 9.0f) : 1.0f;
+	constexpr float fov = 70.0;
+	const float verticalFov = 2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(fov) * 0.5f) / ratio);
 
-	const Matrix perspective = DirectX::XMMatrixPerspectiveFovRH(fovAngleY, aspectRatioX, 0.01f, 100.0f); 
+	constexpr float nearPlane = 0.01f;
+	constexpr float farPlane = 100.0f;
+	const Matrix perspective = DirectX::XMMatrixPerspectiveFovRH(verticalFov, aspectRatio, nearPlane, farPlane); 
 	_projectionMatrices._projection = DirectX::XMMatrixTranspose(perspective);
 }
 
@@ -296,10 +299,10 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 void Renderer::Update() {
 	const float radians = DirectX::XMConvertToRadians((float)_frame++);
 	const Matrix rotation = DirectX::XMMatrixRotationY(radians);
-	_projectionMatrices._world = DirectX::XMMatrixTranspose(rotation);
+	_projectionMatrices._model = DirectX::XMMatrixTranspose(rotation);
 
-	const Matrix MVP = _projectionMatrices._projection * _projectionMatrices._view * _projectionMatrices._world;
-	DirectX::XMStoreFloat4x4(&_constantBufferData._MVP, MVP);
+	const Matrix mvp = _projectionMatrices._projection * _projectionMatrices._view * _projectionMatrices._model;
+	DirectX::XMStoreFloat4x4(&_constantBufferData._mvp, mvp);
 
 	_deviceContext->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_constantBufferData, 0, 0);
 }

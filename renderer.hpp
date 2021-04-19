@@ -62,13 +62,13 @@ private:
 	UINT _indexCount = 0;
 
 	struct ProjectionMatrices {
-		Matrix _world;
+		Matrix _model;
 		Matrix _view;
 		Matrix _projection;
 	} _projectionMatrices;
 
 	struct ConstantBufferData {
-		DirectX::XMFLOAT4X4 _MVP;
+		DirectX::XMFLOAT4X4 _mvp;
 	} _constantBufferData;
 	static_assert((sizeof(ConstantBufferData) % 16) == 0, "Constant Buffer size must be 16-byte aligned");
 
