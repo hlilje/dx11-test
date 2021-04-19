@@ -30,6 +30,9 @@ private:
 	void Present();
 
 private:
+	using Vector = DirectX::XMVECTOR;
+	using Matrix = DirectX::XMMATRIX;
+
 	template<typename T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
 
@@ -58,10 +61,14 @@ private:
 	D3D11_VIEWPORT _viewport;
 	UINT _indexCount = 0;
 
+	struct ProjectionMatrices {
+		Matrix _world;
+		Matrix _view;
+		Matrix _projection;
+	} _projectionMatrices;
+
 	struct ConstantBufferData {
-		DirectX::XMFLOAT4X4 _world;
-		DirectX::XMFLOAT4X4 _view;
-		DirectX::XMFLOAT4X4 _projection;
+		DirectX::XMFLOAT4X4 _MVP;
 	} _constantBufferData;
 	static_assert((sizeof(ConstantBufferData) % 16) == 0, "Constant Buffer size must be 16-byte aligned");
 

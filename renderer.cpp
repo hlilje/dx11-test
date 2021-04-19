@@ -7,11 +7,9 @@
 
 
 namespace {
-	using Float3 = DirectX::XMFLOAT3;
-	using Vector = DirectX::XMVECTOR;
-	using Matrix = DirectX::XMMATRIX;
-
 	struct Vertex {
+		using Float3 = DirectX::XMFLOAT3;
+
 		Float3 _position;
 		Float3 _color;
 	};
@@ -175,7 +173,10 @@ bool Renderer::CreateResources() {
 	};
 	_indexCount = ARRAYSIZE(indices);
 
-	const CD3D11_BUFFER_DESC indexBufferDesc(sizeof(indices), D3D11_BIND_INDEX_BUFFER);
+	const CD3D11_BUFFER_DESC indexBufferDesc(
+		sizeof(indices),
+		D3D11_BIND_INDEX_BUFFER
+	);
 
 	D3D11_SUBRESOURCE_DATA indexSubresource;
 	ZeroMemory(&indexSubresource, sizeof(D3D11_SUBRESOURCE_DATA));
@@ -249,16 +250,14 @@ void Renderer::CreateMatrices() {
 	const Vector up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.f);
 
 	const Matrix lookAt = DirectX::XMMatrixLookAtRH(eye, at, up);
-	const Matrix lookAtT = DirectX::XMMatrixTranspose(lookAt);
-	DirectX::XMStoreFloat4x4(&_constantBufferData._view, lookAtT);
+	_projectionMatrices._view = DirectX::XMMatrixTranspose(lookAt);
 
 	const float aspectRatioX = (float)_backBufferWidth / (float)_backBufferHeight;
 	const float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
 	const float fovAngleY = 2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY);
 
 	const Matrix perspective = DirectX::XMMatrixPerspectiveFovRH(fovAngleY, aspectRatioX, 0.01f, 100.0f); 
-	const Matrix perspectiveT = DirectX::XMMatrixTranspose(perspective);
-	DirectX::XMStoreFloat4x4(&_constantBufferData._projection, perspectiveT);
+	_projectionMatrices._projection = DirectX::XMMatrixTranspose(perspective);
 }
 
 bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob) {
@@ -297,8 +296,10 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 void Renderer::Update() {
 	const float radians = DirectX::XMConvertToRadians((float)_frame++);
 	const Matrix rotation = DirectX::XMMatrixRotationY(radians);
-	const Matrix rotationT = DirectX::XMMatrixTranspose(rotation);
-	DirectX::XMStoreFloat4x4(&_constantBufferData._world, rotationT);
+	_projectionMatrices._world = DirectX::XMMatrixTranspose(rotation);
+
+	const Matrix MVP = _projectionMatrices._projection * _projectionMatrices._view * _projectionMatrices._world;
+	DirectX::XMStoreFloat4x4(&_constantBufferData._MVP, MVP);
 
 	_deviceContext->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_constantBufferData, 0, 0);
 }

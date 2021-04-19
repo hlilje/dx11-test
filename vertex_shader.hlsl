@@ -9,9 +9,7 @@ struct VS_OUTPUT {
 };
 
 cbuffer ConstantBuffer : register(b0) {
-    matrix World;
-    matrix View;
-    matrix Projection;
+    matrix _MVP;
 };
 
 VS_OUTPUT main(VS_INPUT Input) {
@@ -20,9 +18,7 @@ VS_OUTPUT main(VS_INPUT Input) {
     float4 position = float4(Input._Position, 1.0f);
 
     // Transform the position from object space to homogeneous projection space
-    position = mul(position, World);
-    position = mul(position, View);
-    position = mul(position, Projection);
+    position = mul(position, _MVP);
     Output._Position = position;
 
     // Just pass through the color data
