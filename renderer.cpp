@@ -363,7 +363,7 @@ void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY) {
 
 	const Vector viewDir = DirectX::XMVectorNegate(_projection._view.r[2]);
 	const float cosAngle = DirectX::XMVectorGetX(DirectX::XMVector3Dot(viewDir, _camera._up));
-	// TODO: Never hit
+	// TODO: Doesn't work
 	if (cosAngle * sgn(deltaAngleY) > 0.99f) {
 		deltaAngleY = 0.0f;
 	}
