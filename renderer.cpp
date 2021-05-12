@@ -51,8 +51,8 @@ bool Renderer::Create(const Config& config) {
 	return true;
 }
 
-void Renderer::Run(long mousePosX, long mousePosY) {
-	Update(mousePosX, mousePosY);
+void Renderer::Run(long mousePosX, long mousePosY, bool clicking) {
+	Update(mousePosX, mousePosY, clicking);
 	Render();
 	Present();
 }
@@ -310,8 +310,10 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 	return true;
 }
 
-void Renderer::Update(long mousePosX, long mousePosY) {
-	UpdateArcballCamera(mousePosX, mousePosY);
+void Renderer::Update(long mousePosX, long mousePosY, bool clicking) {
+	if (clicking) {
+		UpdateArcballCamera(mousePosX, mousePosY);
+	}
 
 	const Matrix mvp = _projection._projection * _projection._view * _projection._model;
 	DirectX::XMStoreFloat4x4(&_constantBufferData._mvp, mvp);
@@ -360,7 +362,7 @@ void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY) {
 	float deltaAngleY = (float)M_PI / _viewport.Height;
 
 	const Vector viewDir = DirectX::XMVectorNegate(_projection._view.r[2]);
-	const float cosAngle = DirectX::XMVectorGetX(DirectX::XMVector3Dot(viewDir, _camera._at));
+	const float cosAngle = DirectX::XMVectorGetX(DirectX::XMVector3Dot(viewDir, _camera._up));
 	// TODO: Never hit
 	if (cosAngle * sgn(deltaAngleY) > 0.99f) {
 		deltaAngleY = 0.0f;

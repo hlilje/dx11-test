@@ -13,7 +13,7 @@ public:
 		HWND _window = nullptr;
 	};
 	bool Create(const Config& config);
-	void Run(long mousePosX, long mousePosY);
+	void Run(long mousePosX, long mousePosY, bool clicking);
 
 private:
 	using Vector = DirectX::XMVECTOR;
@@ -28,7 +28,7 @@ private:
 	void CreateViewMatrix(const Vector& eye, const Vector& at, const Vector& up);
 	bool CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob);
 
-	void Update(long mousePosX, long mousePosY);
+	void Update(long mousePosX, long mousePosY, bool clicking);
 	void Render();
 	void Present();
 

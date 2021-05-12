@@ -105,7 +105,8 @@ void Window::Run() {
 			POINT point;
 			GetCursorPos(&point);
 			ScreenToClient(_window, &point);
-			_renderer.Run(point.x, point.y);
+			const bool clicking = GetKeyState(VK_LBUTTON) & (1 << 15);
+			_renderer.Run(point.x, point.y, clicking);
 		}
 	}
 }
