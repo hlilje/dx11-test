@@ -16,8 +16,6 @@ public:
 	void Run(long mousePosX, long mousePosY, bool clicking);
 
 private:
-	using Vector = DirectX::XMVECTOR;
-
 	bool CreateContext(const Config& config);
 	bool CreateRenderTarget();
 	bool CreateDepthStencil();
@@ -25,7 +23,6 @@ private:
 	bool CreateShaders();
 	void CreateMatrices();
 
-	void CreateViewMatrix(const Vector& eye, const Vector& at, const Vector& up);
 	bool CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob);
 
 	void Update(long mousePosX, long mousePosY, bool clicking);
@@ -35,8 +32,6 @@ private:
 	void UpdateArcballCamera(long mousePosX, long mousePosY);
 
 private:
-	using Matrix = DirectX::XMMATRIX;
-
 	template<typename T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
 
@@ -69,15 +64,15 @@ private:
 	long _lastMousePosY = 0;
 
 	struct Camera {
-		Vector _eye;
-		Vector _at;
-		Vector _up;
+		DirectX::XMVECTOR _eye;
+		DirectX::XMVECTOR _at;
+		DirectX::XMVECTOR _up;
 	} _camera;
 
 	struct Projection {
-		Matrix _model;
-		Matrix _view;
-		Matrix _projection;
+		DirectX::XMMATRIX _model;
+		DirectX::XMMATRIX _view;
+		DirectX::XMMATRIX _projection;
 	} _projection;
 
 	struct ConstantBufferData {

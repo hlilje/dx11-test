@@ -9,6 +9,9 @@
 
 
 namespace {
+	using Vector = DirectX::XMVECTOR;
+	using Matrix = DirectX::XMMATRIX;
+
 	struct Vertex {
 		using Float3 = DirectX::XMFLOAT3;
 
@@ -16,8 +19,9 @@ namespace {
 		Float3 _color;
 	};
 
-	template <typename T> int sgn(T val) {
-		return (T(0) < val) - (val < T(0));
+	Matrix CreateViewMatrix(const Vector& eye, const Vector& at, const Vector& up) {
+		const Matrix lookAt = DirectX::XMMatrixLookAtRH(eye, at, up);
+		return DirectX::XMMatrixTranspose(lookAt);
 	}
 }
 
@@ -249,10 +253,10 @@ bool Renderer::CreateShaders() {
 }
 
 void Renderer::CreateMatrices() {
-	const Vector eye = DirectX::XMVectorSet(0.0f, 0.7f, 1.5f, 0.0f);
-	const Vector at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.0f);
-	const Vector up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	CreateViewMatrix(eye, at, up);
+	_camera._eye = DirectX::XMVectorSet(0.0f, 0.7f, 1.5f, 0.0f);
+	_camera._at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.0f);
+	_camera._up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) ;
+	_projection._view = CreateViewMatrix(_camera._eye, _camera._at, _camera._up);
 
 	const float aspectRatio = (float)_backBufferWidth / (float)_backBufferHeight;
 	const float ratio = aspectRatio < (16.0f / 9.0f) ? aspectRatio / (16.0f / 9.0f) : 1.0f;
@@ -266,15 +270,6 @@ void Renderer::CreateMatrices() {
 
 	const Matrix rotation = DirectX::XMMatrixRotationY(0.0f);
 	_projection._model = DirectX::XMMatrixTranspose(rotation);
-}
-
-void Renderer::CreateViewMatrix(const Vector& eye, const Vector& at, const Vector& up) {
-	_camera._eye = eye;
-	_camera._at = at;
-	_camera._up = up;
-
-	const Matrix lookAt = DirectX::XMMatrixLookAtRH(eye, at, up);
-	_projection._view = DirectX::XMMatrixTranspose(lookAt);
 }
 
 bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob) {
@@ -361,13 +356,6 @@ void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY) {
 	const float deltaAngleX = (2.0f * (float)M_PI) / _viewport.Width;
 	float deltaAngleY = (float)M_PI / _viewport.Height;
 
-	const Vector viewDir = DirectX::XMVectorNegate(_projection._view.r[2]);
-	const float cosAngle = DirectX::XMVectorGetX(DirectX::XMVector3Dot(viewDir, _camera._up));
-	// TODO: Doesn't work
-	if (cosAngle * sgn(deltaAngleY) > 0.99f) {
-		deltaAngleY = 0.0f;
-	}
-
 	Vector position = DirectX::XMVectorSetW(_camera._eye, 1.0f);
 	Vector pivot = DirectX::XMVectorSetW(_camera._at, 1.0f);
 
@@ -382,5 +370,12 @@ void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY) {
 	const Vector cameraPos = DirectX::XMVectorAdd(
 		DirectX::XMVector3Transform(DirectX::XMVectorSubtract(position, pivot), rotMatrixY), pivot);
 
-	CreateViewMatrix(cameraPos, _camera._at, _camera._up);
+	const Matrix viewMatrix = CreateViewMatrix(cameraPos, _camera._at, _camera._up);
+
+	const Vector viewDir = DirectX::XMVectorNegate(viewMatrix.r[2]);
+	const float cosAngle = DirectX::XMVectorGetX(DirectX::XMVector3Dot(viewDir, _camera._up));
+	if (abs(cosAngle) < 0.99f) {
+		_camera._eye = cameraPos;
+		_projection._view = viewMatrix;
+	}
 }
