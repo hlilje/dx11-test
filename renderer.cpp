@@ -306,8 +306,8 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 }
 
 void Renderer::Update(const Renderer::Input& input) {
-	if (input._clicking) {
-		UpdateArcballCamera(input._mousePosX, input._mousePosY);
+	if (input._clicking || input._mouseWheelDelta != 0) {
+		UpdateArcballCamera(input._mousePosX, input._mousePosY, input._mouseWheelDelta);
 	}
 
 	const Matrix mvp = _projection._projection * _projection._view * _projection._model;
@@ -352,7 +352,7 @@ void Renderer::Present() {
 	_swapChain->Present(1, 0);
 }
 
-void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY) {
+void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY, int mouseWheelDelta) {
 	const float deltaAngleX = (2.0f * (float)M_PI) / _viewport.Width;
 	float deltaAngleY = (float)M_PI / _viewport.Height;
 
@@ -367,8 +367,15 @@ void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY) {
 	const float angleY = (_lastMousePosY - mousePosY) * deltaAngleY;
 	const Vector rightVec = _projection._view.r[0];
 	const Matrix rotMatrixY = DirectX::XMMatrixRotationAxis(rightVec, angleY);
-	const Vector cameraPos = DirectX::XMVectorAdd(
-		DirectX::XMVector3Transform(DirectX::XMVectorSubtract(position, pivot), rotMatrixY), pivot);
+	const Vector dir = DirectX::XMVectorSubtract(position, pivot);
+	Vector cameraPos = DirectX::XMVectorAdd(DirectX::XMVector3Transform(dir, rotMatrixY), pivot);
+
+	constexpr float distanceDeltaFactor = 1000.0f;
+	const float distanceDelta = (float)mouseWheelDelta / distanceDeltaFactor;
+	const Vector distanceVec = DirectX::XMVectorMultiply(
+		DirectX::XMVectorNegate(DirectX::XMVector3Normalize(dir)),
+		DirectX::XMVectorReplicate(distanceDelta));
+	cameraPos = DirectX::XMVectorAdd(cameraPos, distanceVec);
 
 	const Matrix viewMatrix = CreateViewMatrix(cameraPos, _camera._at, _camera._up);
 

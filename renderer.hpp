@@ -36,7 +36,7 @@ private:
 	void Render();
 	void Present();
 
-	void UpdateArcballCamera(long mousePosX, long mousePosY);
+	void UpdateArcballCamera(long mousePosX, long mousePosY, int mouseWheelDelta);
 
 private:
 	template<typename T>
