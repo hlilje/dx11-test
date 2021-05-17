@@ -28,27 +28,27 @@ namespace {
 
 bool Renderer::Create(const Config& config) {
 	if (!CreateContext(config)) {
-		std::cerr << "Failed creating render context" << std::endl;
+		std::cerr << "Failed to create the render context" << std::endl;
 		return false;
 	}
 
 	if (!CreateRenderTarget()) {
-		std::cerr << "Failed creating render target" << std::endl;
+		std::cerr << "Failed to create the render target" << std::endl;
 		return false;
 	}
 
 	if (!CreateDepthStencil()) {
-		std::cerr << "Failed creating depth stencil" << std::endl;
+		std::cerr << "Failed to create the depth stencil" << std::endl;
 		return false;
 	}
 
 	if (!CreateResources()) {
-		std::cerr << "Failed creating resources" << std::endl;
+		std::cerr << "Failed to create the resources" << std::endl;
 		return false;
 	}
 
 	if (!CreateShaders()) {
-		std::cerr << "Failed creating shaders" << std::endl;
+		std::cerr << "Failed to create the shaders" << std::endl;
 		return false;
 	}
 
@@ -148,7 +148,7 @@ bool Renderer::CreateDepthStencil() {
 }
 
 bool Renderer::CreateResources() {
-	constexpr Vertex vertices[] = {
+	static constexpr Vertex vertices[] = {
 		{{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}},
 		{{-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}},
 		{{-0.5f,  0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
@@ -171,7 +171,7 @@ bool Renderer::CreateResources() {
 		return false;
 	}
 
-	constexpr unsigned int indices[] = {
+	static constexpr unsigned int indices[] = {
 		0,2,1, 1,2,3,
 		4,5,6, 5,7,6,
 		0,1,5, 0,5,4,
@@ -235,7 +235,7 @@ bool Renderer::CreateShaders() {
 		return false;
 	}
 
-	constexpr D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
+	static constexpr D3D11_INPUT_ELEMENT_DESC inputLayoutDesc[] = {
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
