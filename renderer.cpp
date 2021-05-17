@@ -7,21 +7,23 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+using namespace DirectX;
+
 
 namespace {
-	using Vector = DirectX::XMVECTOR;
-	using Matrix = DirectX::XMMATRIX;
+	using Vector = XMVECTOR;
+	using Matrix = XMMATRIX;
 
 	struct Vertex {
-		using Float3 = DirectX::XMFLOAT3;
+		using Float3 = XMFLOAT3;
 
 		Float3 _position;
 		Float3 _color;
 	};
 
 	Matrix CreateViewMatrix(const Vector& eye, const Vector& at, const Vector& up) {
-		const Matrix lookAt = DirectX::XMMatrixLookAtRH(eye, at, up);
-		return DirectX::XMMatrixTranspose(lookAt);
+		const Matrix lookAt = XMMatrixLookAtRH(eye, at, up);
+		return XMMatrixTranspose(lookAt);
 	}
 }
 
@@ -253,23 +255,23 @@ bool Renderer::CreateShaders() {
 }
 
 void Renderer::CreateMatrices() {
-	_camera._eye = DirectX::XMVectorSet(0.0f, 0.7f, 1.5f, 0.0f);
-	_camera._at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.0f);
-	_camera._up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) ;
+	_camera._eye = XMVectorSet(0.0f, 0.7f, 1.5f, 0.0f);
+	_camera._at = XMVectorSet(0.0f, -0.1f, 0.0f, 0.0f);
+	_camera._up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f) ;
 	_projection._view = CreateViewMatrix(_camera._eye, _camera._at, _camera._up);
 
 	const float aspectRatio = (float)_backBufferWidth / (float)_backBufferHeight;
 	const float ratio = aspectRatio < (16.0f / 9.0f) ? aspectRatio / (16.0f / 9.0f) : 1.0f;
 	constexpr float fov = 70.0;
-	const float verticalFov = 2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(fov) * 0.5f) / ratio);
+	const float verticalFov = 2.0f * std::atan(std::tan(XMConvertToRadians(fov) * 0.5f) / ratio);
 
 	constexpr float nearPlane = 0.01f;
 	constexpr float farPlane = 100.0f;
-	const Matrix perspective = DirectX::XMMatrixPerspectiveFovRH(verticalFov, aspectRatio, nearPlane, farPlane); 
-	_projection._projection = DirectX::XMMatrixTranspose(perspective);
+	const Matrix perspective = XMMatrixPerspectiveFovRH(verticalFov, aspectRatio, nearPlane, farPlane); 
+	_projection._projection = XMMatrixTranspose(perspective);
 
-	const Matrix rotation = DirectX::XMMatrixRotationY(0.0f);
-	_projection._model = DirectX::XMMatrixTranspose(rotation);
+	const Matrix rotation = XMMatrixRotationY(0.0f);
+	_projection._model = XMMatrixTranspose(rotation);
 }
 
 bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob) {
@@ -311,7 +313,7 @@ void Renderer::Update(const Renderer::Input& input) {
 	}
 
 	const Matrix mvp = _projection._projection * _projection._view * _projection._model;
-	DirectX::XMStoreFloat4x4(&_constantBufferData._mvp, mvp);
+	XMStoreFloat4x4(&_constantBufferData._mvp, mvp);
 
 	_deviceContext->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_constantBufferData, 0, 0);
 
@@ -356,31 +358,30 @@ void Renderer::UpdateArcballCamera(long mousePosX, long mousePosY, int mouseWhee
 	const float deltaAngleX = (2.0f * (float)M_PI) / _viewport.Width;
 	float deltaAngleY = (float)M_PI / _viewport.Height;
 
-	Vector position = DirectX::XMVectorSetW(_camera._eye, 1.0f);
-	Vector pivot = DirectX::XMVectorSetW(_camera._at, 1.0f);
+	Vector position = XMVectorSetW(_camera._eye, 1.0f);
+	Vector pivot = XMVectorSetW(_camera._at, 1.0f);
 
 	const float angleX = (_lastMousePosX - mousePosX) * deltaAngleX;
-	const Matrix rotMatrixX = DirectX::XMMatrixRotationAxis(_camera._up, angleX);
-	position = DirectX::XMVectorAdd(DirectX::XMVector3Transform(
-		DirectX::XMVectorSubtract(position, pivot), rotMatrixX), pivot);
+	const Matrix rotMatrixX = XMMatrixRotationAxis(_camera._up, angleX);
+	position = XMVectorAdd(XMVector3Transform(XMVectorSubtract(position, pivot), rotMatrixX), pivot);
 
 	const float angleY = (_lastMousePosY - mousePosY) * deltaAngleY;
 	const Vector rightVec = _projection._view.r[0];
-	const Matrix rotMatrixY = DirectX::XMMatrixRotationAxis(rightVec, angleY);
-	const Vector dir = DirectX::XMVectorSubtract(position, pivot);
-	Vector cameraPos = DirectX::XMVectorAdd(DirectX::XMVector3Transform(dir, rotMatrixY), pivot);
+	const Matrix rotMatrixY = XMMatrixRotationAxis(rightVec, angleY);
+	const Vector dir = XMVectorSubtract(position, pivot);
+	Vector cameraPos = XMVectorAdd(XMVector3Transform(dir, rotMatrixY), pivot);
 
 	constexpr float distanceDeltaFactor = 1000.0f;
 	const float distanceDelta = (float)mouseWheelDelta / distanceDeltaFactor;
-	const Vector distanceVec = DirectX::XMVectorMultiply(
-		DirectX::XMVectorNegate(DirectX::XMVector3Normalize(dir)),
-		DirectX::XMVectorReplicate(distanceDelta));
-	cameraPos = DirectX::XMVectorAdd(cameraPos, distanceVec);
+	const Vector distanceVec = XMVectorMultiply(
+		XMVectorNegate(XMVector3Normalize(dir)),
+		XMVectorReplicate(distanceDelta));
+	cameraPos = XMVectorAdd(cameraPos, distanceVec);
 
 	const Matrix viewMatrix = CreateViewMatrix(cameraPos, _camera._at, _camera._up);
 
-	const Vector viewDir = DirectX::XMVectorNegate(viewMatrix.r[2]);
-	const float cosAngle = DirectX::XMVectorGetX(DirectX::XMVector3Dot(viewDir, _camera._up));
+	const Vector viewDir = XMVectorNegate(viewMatrix.r[2]);
+	const float cosAngle = XMVectorGetX(XMVector3Dot(viewDir, _camera._up));
 	if (abs(cosAngle) < 0.99f) {
 		_camera._eye = cameraPos;
 		_projection._view = viewMatrix;
