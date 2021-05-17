@@ -18,6 +18,7 @@ private:
 private:
 	static const std::wstring _className;
 	static HINSTANCE _instance;
+	static int _mouseWheelDelta;
 
 	const int _width = 1500;
 	const int _height = 1000;

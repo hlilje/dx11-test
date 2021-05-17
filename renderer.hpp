@@ -13,7 +13,14 @@ public:
 		HWND _window = nullptr;
 	};
 	bool Create(const Config& config);
-	void Run(long mousePosX, long mousePosY, bool clicking);
+
+	struct Input {
+		long _mousePosX = 0;
+		long _mousePosY = 0;
+		int _mouseWheelDelta = 0;
+		bool _clicking = false;
+	};
+	void Run(const Input& input);
 
 private:
 	bool CreateContext(const Config& config);
@@ -25,7 +32,7 @@ private:
 
 	bool CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile, ID3DBlob** blob);
 
-	void Update(long mousePosX, long mousePosY, bool clicking);
+	void Update(const Input& input);
 	void Render();
 	void Present();
 

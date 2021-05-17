@@ -55,8 +55,8 @@ bool Renderer::Create(const Config& config) {
 	return true;
 }
 
-void Renderer::Run(long mousePosX, long mousePosY, bool clicking) {
-	Update(mousePosX, mousePosY, clicking);
+void Renderer::Run(const Renderer::Input& input) {
+	Update(input);
 	Render();
 	Present();
 }
@@ -305,9 +305,9 @@ bool Renderer::CompileShader(LPCWSTR srcFile, LPCSTR entryPoint, LPCSTR profile,
 	return true;
 }
 
-void Renderer::Update(long mousePosX, long mousePosY, bool clicking) {
-	if (clicking) {
-		UpdateArcballCamera(mousePosX, mousePosY);
+void Renderer::Update(const Renderer::Input& input) {
+	if (input._clicking) {
+		UpdateArcballCamera(input._mousePosX, input._mousePosY);
 	}
 
 	const Matrix mvp = _projection._projection * _projection._view * _projection._model;
@@ -315,8 +315,8 @@ void Renderer::Update(long mousePosX, long mousePosY, bool clicking) {
 
 	_deviceContext->UpdateSubresource(_constantBuffer.Get(), 0, nullptr, &_constantBufferData, 0, 0);
 
-	_lastMousePosX = mousePosX;
-	_lastMousePosY = mousePosY;
+	_lastMousePosX = input._mousePosX;
+	_lastMousePosY = input._mousePosY;
 }
 
 void Renderer::Render() {

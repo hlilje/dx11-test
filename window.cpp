@@ -7,6 +7,7 @@
 
 const std::wstring Window::_className = L"Direct3DWindowClass";
 HINSTANCE Window::_instance = nullptr;
+int Window::_mouseWheelDelta = 0;
 
 namespace {
 	bool CheckHadError() {
@@ -32,8 +33,13 @@ LRESULT CALLBACK Window::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM l
 			DestroyWindow(hwnd);
 			UnregisterClass(_className.c_str(), _instance);
 			return 0;
-		} case WM_DESTROY: {
+		}
+		case WM_DESTROY: {
 			PostQuitMessage(0);
+			break;
+		}
+		case WM_MOUSEWHEEL: {
+			_mouseWheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 			break;
 		}
 	}
@@ -102,11 +108,20 @@ void Window::Run() {
 			TranslateMessage(&message);
 			DispatchMessage(&message);
 		} else {
+			Renderer::Input input;
+
 			POINT point;
 			GetCursorPos(&point);
 			ScreenToClient(_window, &point);
-			const bool clicking = GetKeyState(VK_LBUTTON) & (1 << 15);
-			_renderer.Run(point.x, point.y, clicking);
+			input._mousePosX = point.x;
+			input._mousePosY = point.y;
+
+			input._mouseWheelDelta = _mouseWheelDelta;
+			_mouseWheelDelta = 0;
+
+			input._clicking = GetKeyState(VK_LBUTTON) & (1 << 15);
+
+			_renderer.Run(input);
 		}
 	}
 }
