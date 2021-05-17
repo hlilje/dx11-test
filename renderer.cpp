@@ -15,10 +15,8 @@ namespace {
 	using Matrix = XMMATRIX;
 
 	struct Vertex {
-		using Float3 = XMFLOAT3;
-
-		Float3 _position;
-		Float3 _color;
+		XMFLOAT3 _position;
+		XMFLOAT3 _color;
 	};
 
 	Matrix CreateViewMatrix(const Vector& eye, const Vector& at, const Vector& up) {
